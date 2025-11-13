@@ -1,3 +1,4 @@
+/* eslint-disable regexp/no-contradiction-with-assertion */
 // <demo></demo> or <demo />
 export const demoReg = [
   /<demo(\s)((.|\n)*)><\/demo>/,
@@ -7,13 +8,15 @@ export const demoReg = [
 const scriptLangTsReg = /<\s*script[^>]*\blang=['"]ts['"][^>]*/
 const scriptSetupReg = /<\s*script[^>]*\bsetup\b[^>]*/
 const scriptSetupCommonReg
+  // eslint-disable-next-line regexp/no-super-linear-backtracking
   = /<\s*script\s+(?:(setup|lang='ts'|lang="ts")\s*)?(setup|lang='ts'|lang="ts")?\s*>/
 
 /**
  * 注入 script 脚本
- * @param mdInstance
+ * @param env mdInstance
  * @param path
- * @param componentName
+ * @param name component name
+ * @param type
  */
 export function injectComponentImportScript(env: any, path: string, name?: string, type?: 'dynamicImport' | 'inject') {
   const scriptsCode = env.sfcBlocks.scripts as any[]
@@ -101,7 +104,7 @@ export function injectComponentImportScript(env: any, path: string, name?: strin
 /**
  * 根据组件路径组合组件引用名称
  * @param path
- * @returns
+ * @returns string
  */
 export function composeComponentName(path: string) {
   let isFlag = true

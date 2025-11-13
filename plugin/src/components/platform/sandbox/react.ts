@@ -1,5 +1,4 @@
 import type { PlatformParams } from '@/constant/type'
-// @ts-ignore
 import { getParameters } from 'codesandbox/lib/api/define'
 import { ComponentType, PlatformType } from '@/constant/type'
 import {

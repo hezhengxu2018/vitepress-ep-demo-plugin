@@ -73,6 +73,8 @@ export function useDemoBox(
   })
 
   const activeFile = ref<string>('')
+  const type = ref<ComponentType>(ComponentType.VUE)
+
   const currentFiles = computed<
     Record<string, { code: string, filename: string, html?: string }>
   >(() => {
@@ -89,8 +91,6 @@ export function useDemoBox(
   const tabOrders = computed(() => {
     return props.order.split(',').map((item: string) => item.trim())
   })
-
-  const type = ref<ComponentType>(ComponentType.VUE)
 
   const { isCodeFold, setCodeFold } = useCodeFold()
   const { clickCopy } = useCodeCopy()
@@ -254,7 +254,7 @@ export function useDemoBox(
 
   watch(
     () => props.reactCode,
-    (val: string, prevVal: string) => {
+    (val?: string, prevVal?: string) => {
       if (val && val !== prevVal && root) {
         root.render(props.reactCreateElement(props.reactComponent, {}, null))
       }
@@ -264,7 +264,7 @@ export function useDemoBox(
 
   watch(
     () => props.select,
-    (val: ComponentType) => {
+    (val?: ComponentType) => {
       if (val && props[`${val}Code` as keyof VitepressDemoBoxProps]) {
         type.value = val
       }

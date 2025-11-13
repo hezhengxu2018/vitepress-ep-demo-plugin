@@ -44,9 +44,14 @@
       "optional": true
     }
   },
+  "dependencies": {
+    "codesandbox": "2.2.3",
+    "pretty": "*"
+  },
   "devDependencies": {
     "@stackblitz/sdk": "^1.11.0",
     "@types/markdown-it": "^12.2.3",
-    "@types/node": "^20.4.2"
+    "@types/node": "^20.4.2",
+    "tsdown": "0.16.0"
   }
 }

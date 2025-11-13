@@ -20,9 +20,8 @@ export function getCodeSandboxParams(params: PlatformParams) {
     ...scopeFiles,
   }
   for (const file in params.customFiles) {
-    // @ts-ignore
-    params.customFiles[file] = {
-      content: params.customFiles[file] || '',
+    (params.customFiles[file] as unknown as { content: string }) = {
+      content: (params.customFiles[file] as string) || '',
     }
   }
 

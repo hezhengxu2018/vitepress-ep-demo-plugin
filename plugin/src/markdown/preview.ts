@@ -137,8 +137,8 @@ export interface VitepressDemoBoxConfig {
  * @param md
  * @param token
  * @param mdFile
- * @param demoDir
- * @returns
+ * @param config
+ * @returns string
  */
 export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, config?: VitepressDemoBoxConfig) {
   const {
@@ -387,7 +387,7 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
       const fencedCode = `\`\`\` ${lang}\n${code}\n\`\`\``
       return md.render(fencedCode)
     }
-    catch (error) {
+    catch (_error) {
       return ''
     }
   }
@@ -407,7 +407,7 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
         )
       }
     }
-    catch (error) {
+    catch (_error) {
       highlightedCode[type] = ''
     }
   }
@@ -477,7 +477,7 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
           }
         }
       }
-      catch (error) {
+      catch (_error) {
         // 格式错误，则不展示该文件
       }
     }
@@ -510,7 +510,7 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
       : `<vitepress-demo-placeholder v-show="${placeholderVisibleKey}" />`
   }
   ${ssgValue ? '' : '<ClientOnly>'}
-    <${wrapperComponentName} 
+    <${wrapperComponentName}
       title="${componentProps.title}"
       description="${componentProps.description}"
       locale="${locale}"
