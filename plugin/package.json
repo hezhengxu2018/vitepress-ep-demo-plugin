@@ -1,0 +1,52 @@
+{
+  "name": "vitepress-ep-demo-plugin",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "A vitepress plugin to preview component and display code",
+  "author": "hezhengxu",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:hezhengxu2018/vitepress-ep-demo-plugin.git"
+  },
+  "keywords": [
+    "vitepress",
+    "plugin",
+    "code",
+    "demo",
+    "block",
+    "preview",
+    "component",
+    "element-plus"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "dev:theme-ep": "vite build --mode theme-ep --watch",
+    "release": "pnpm build && vr release --skip-changelog"
+  },
+  "peerDependencies": {
+    "element-plus": "^2.2.0",
+    "vitepress": "*",
+    "vue": "^3.2.0"
+  },
+  "peerDependenciesMeta": {
+    "element-plus": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@stackblitz/sdk": "^1.11.0",
+    "@types/markdown-it": "^12.2.3",
+    "@types/node": "^20.4.2"
+  }
+}
