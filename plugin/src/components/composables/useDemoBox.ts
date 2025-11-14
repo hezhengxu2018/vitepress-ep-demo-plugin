@@ -102,7 +102,25 @@ export function useDemoBox(
     return props[`${type.value}Code` as keyof VitepressDemoBoxProps]
   })
 
-  const displayCode = ref('')
+  const parsedCodeHighlights = computed<Record<string, string>>(() => {
+    if (!props.codeHighlights) {
+      return {}
+    }
+    try {
+      return JSON.parse(decodeURIComponent(props.codeHighlights))
+    }
+    catch (error) {
+      console.error(error)
+      return {}
+    }
+  })
+
+  const currentCodeHtml = computed(() => {
+    if (currentFiles.value && currentFiles.value[activeFile.value]) {
+      return currentFiles.value[activeFile.value].html || ''
+    }
+    return parsedCodeHighlights.value?.[type.value] || ''
+  })
 
   const tabs = computed<ComponentType[]>(() => {
     const files = parsedFiles.value || {}
@@ -325,7 +343,7 @@ export function useDemoBox(
     isCodeFold,
     setCodeFold,
     currentCode,
-    displayCode,
+    currentCodeHtml,
     openGithub,
     openGitlab,
     clickCodeCopy,

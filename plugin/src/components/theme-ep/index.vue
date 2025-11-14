@@ -45,7 +45,7 @@ const {
   currentFiles,
   activeFile,
   currentCode,
-  displayCode,
+  currentCodeHtml,
   openGithub,
   openGitlab,
   clickCodeCopy,
@@ -150,7 +150,7 @@ const ns = useEpNameSpace();
               </ElRadioButton>
             </ElRadioGroup>
           </div>
-          <div v-html="displayCode"></div>
+          <div v-html="currentCodeHtml"></div>
         </div>
       </ElCollapseTransition>
 

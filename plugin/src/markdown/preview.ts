@@ -147,7 +147,7 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
     stackblitz = { show: false },
     codesandbox = { show: false },
     codeplayer = { show: false },
-    wrapperComponentName = 'vitepress-demo-box',
+    wrapperComponentName = 'vitepress-ep-demo-box',
   } = config || {}
   let {
     order = 'vue,react,html',
@@ -273,10 +273,10 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
   // 注入 vitepress-demo-plugin 组件和样式
   injectComponentImportScript(
     mdFile,
-    'vitepress-demo-plugin',
-    `{ VitepressDemoBox, VitepressDemoPlaceholder }`,
+    'vitepress-ep-demo-plugin/theme',
+    `{ VitepressDemoPlaceholder, VitepressEpDemoBox }`,
   )
-  injectComponentImportScript(mdFile, 'vitepress-demo-plugin/dist/style.css')
+  injectComponentImportScript(mdFile, 'vitepress-ep-demo-plugin/theme/styles')
   injectComponentImportScript(mdFile, 'vue', '{ ref, shallowRef, onMounted }')
 
   // 注入组件导入语句

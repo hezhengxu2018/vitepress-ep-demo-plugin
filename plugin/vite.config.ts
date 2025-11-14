@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
-import { EP_NAMESPACE } from './src/constant/style-prefix'
+import { DEFAULT_NAMESPACE, EP_NAMESPACE } from './src/constant/style-prefix'
 
 const entries = {
   index: resolve(__dirname, 'src/index.ts'),
@@ -12,7 +12,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `$epPrefix: '${EP_NAMESPACE}';`,
+        additionalData: `$defaultPrefix: '${DEFAULT_NAMESPACE}';$epPrefix: '${EP_NAMESPACE}';`,
       },
     },
   },
@@ -41,11 +41,13 @@ export default defineConfig({
         'vitepress',
         /^vitepress\/.*/,
         'element-plus',
+        'node:fs',
+        'node:path',
       ],
       output: {
         exports: 'named',
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name?.endsWith('.css'))
+          if (assetInfo.names[0]?.endsWith('.css'))
             return 'theme/[name][extname]'
           return '[name][extname]'
         },

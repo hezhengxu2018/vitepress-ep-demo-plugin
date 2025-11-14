@@ -25,6 +25,9 @@
     },
     "./theme": {
       "import": "./dist/theme/index.js"
+    },
+    "./theme/styles": {
+      "import": "./dist/theme/vitepress-ep-demo-plugin.css"
     }
   },
   "types": "./dist/index.d.ts",
