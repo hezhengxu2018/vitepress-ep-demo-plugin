@@ -97,7 +97,7 @@ importers:
         version: 2.11.7(vue@3.5.24(typescript@5.9.3))
       vitepress:
         specifier: '*'
-        version: 1.6.4(@algolia/client-search@5.43.0)(@types/node@20.19.25)(async-validator@4.2.5)(change-case@5.4.4)(postcss@8.5.6)(sass-embedded@1.93.3)(sass@1.93.3)(search-insights@2.17.3)(typescript@5.9.3)
+        version: 1.6.4(@algolia/client-search@5.43.0)(@types/node@20.19.25)(@types/react@18.3.26)(async-validator@4.2.5)(change-case@5.4.4)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.93.3)(sass@1.93.3)(search-insights@2.17.3)(typescript@5.9.3)
       vue:
         specifier: ^3.2.0
         version: 3.5.24(typescript@5.9.3)
@@ -105,6 +105,9 @@ importers:
       '@types/markdown-it':
         specifier: ^12.2.3
         version: 12.2.3
+      '@types/markdown-it-container':
+        specifier: ^2
+        version: 2.0.10
       '@types/node':
         specifier: ^20.4.2
         version: 20.19.25
@@ -1265,6 +1268,9 @@ packages:
 
   '@types/lodash@4.17.20':
     resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
+
+  '@types/markdown-it-container@2.0.10':
+    resolution: {integrity: sha512-zv+YxrlSYRq51e9kzm3orv4OvF4U79Ll1OyplNXr00o4ZC/8PukJk/jEWH7CnsMtrSWZlyv0czhz42jm9J4uLw==}
 
   '@types/markdown-it@12.2.3':
     resolution: {integrity: sha512-GKMHFfv3458yYy+v/N8gjufHO6MSZKCOXpZc5GXIWWy8uldwfmPn98vp81gZ5f9SVw8YYBctgfJ22a2d7AOMeQ==}
@@ -5772,6 +5778,10 @@ snapshots:
 
   '@types/lodash@4.17.20': {}
 
+  '@types/markdown-it-container@2.0.10':
+    dependencies:
+      '@types/markdown-it': 12.2.3
+
   '@types/markdown-it@12.2.3':
     dependencies:
       '@types/linkify-it': 5.0.0
@@ -9581,7 +9591,7 @@ snapshots:
       sass-embedded: 1.93.3
       yaml: 2.8.1
 
-  vitepress@1.6.4(@algolia/client-search@5.43.0)(@types/node@20.19.25)(async-validator@4.2.5)(change-case@5.4.4)(postcss@8.5.6)(sass-embedded@1.93.3)(sass@1.93.3)(search-insights@2.17.3)(typescript@5.9.3):
+  vitepress@1.6.4(@algolia/client-search@5.43.0)(@types/node@20.19.25)(@types/react@18.3.26)(async-validator@4.2.5)(change-case@5.4.4)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.93.3)(sass@1.93.3)(search-insights@2.17.3)(typescript@5.9.3):
     dependencies:
       '@docsearch/css': 3.8.2
       '@docsearch/js': 3.8.2(@algolia/client-search@5.43.0)(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)

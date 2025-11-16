@@ -6,25 +6,38 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { composeComponentName, injectComponentImportScript } from './utils'
 
-const titleRegex = /title="(.*?)"/
-const vuePathRegex = /vue="(.*?)"/
-const htmlPathRegex = /html="(.*?)"/
-const reactPathRegex = /react="(.*?)"/
-const descriptionRegex = /description="(.*?)"/
-const orderRegex = /order="(.*?)"/
-const selectRegex = /select="(.*?)"/
-const githubRegex = /github="(.*?)"/
-const gitlabRegex = /gitlab="(.*?)"/
-const stackblitzRegex = /stackblitz="(.*?)"/
-const codesandboxRegex = /codesandbox="(.*?)"/
-const codeplayerRegex = /codeplayer="(.*?)"/
-const scopeRegex = /scope="(.*?)"/
-const vueFilesRegex = /vueFiles=("\{((.|\n)*?)\}"|"\[((.|\n)*?)\]")/
-const reactFilesRegex = /reactFiles=("\{((.|\n)*?)\}"|"\[((.|\n)*?)\]")/
-const htmlFilesRegex = /htmlFiles=("\{((.|\n)*?)\}"|"\[((.|\n)*?)\]")/
-const ssgRegex = /ssg="(.*?)"/
-const htmlWriteWayRegex = /htmlWriteWay="(.*?)"/
-const backgroundRegex = /background="(.*?)"/
+// 支持两种写法: key="value" 或 key value，使用单一命名捕获组 `value`（可能包含引号）
+const titleRegex = /title(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const vuePathRegex = /vue(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const htmlPathRegex = /html(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const reactPathRegex = /react(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const descriptionRegex = /description(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const orderRegex = /order(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const selectRegex = /select(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const githubRegex = /github(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const gitlabRegex = /gitlab(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const stackblitzRegex = /stackblitz(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const codesandboxRegex = /codesandbox(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const codeplayerRegex = /codeplayer(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const scopeRegex = /scope(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+// 保持 files 的正则组结构，仅允许 = 或 空格 分割；把整体值放到命名捕获组 value 中（包含两侧引号）
+const vueFilesRegex = /vueFiles(?:=|\s+)(?<value>"(?:\{(?:.|\n)*?\}|\[(?:.|\n)*?\])")/
+const reactFilesRegex = /reactFiles(?:=|\s+)(?<value>"(?:\{(?:.|\n)*?\}|\[(?:.|\n)*?\])")/
+const htmlFilesRegex = /htmlFiles(?:=|\s+)(?<value>"(?:\{(?:.|\n)*?\}|\[(?:.|\n)*?\])")/
+const ssgRegex = /ssg(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const htmlWriteWayRegex = /htmlWriteWay(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const backgroundRegex = /background(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+
+function getGroupValue(m: RegExpMatchArray | null) {
+  const raw = m?.groups?.value ?? ''
+  if (!raw)
+    return ''
+  const first = raw[0]
+  const last = raw[raw.length - 1]
+  if ((first === '"' && last === '"') || (first === '\'' && last === '\''))
+    return raw.slice(1, -1)
+  return raw
+}
 
 export interface DefaultProps {
   title?: string
@@ -163,81 +176,94 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
     react: '',
   }
 
-  // 获取Props相关参数
-  const titleValue = token.content.match(titleRegex)
-  const vuePathRegexValue = token.content.match(vuePathRegex)
-  const htmlPathRegexValue = token.content.match(htmlPathRegex)
-  const reactPathRegexValue = token.content.match(reactPathRegex)
-  const descriptionRegexValue = token.content.match(descriptionRegex)
-  const orderValue = token.content.match(orderRegex)
-  const selectValue = token.content.match(selectRegex)
-  const githubValue = token.content.match(githubRegex)
-  const gitlabValue = token.content.match(gitlabRegex)
-  const stackblitzValue = token.content.match(stackblitzRegex)
-  const codesandboxValue = token.content.match(codesandboxRegex)
-  const codeplayerValue = token.content.match(codeplayerRegex)
-  const scopeValue = token.content.match(scopeRegex)?.[1] || ''
-  const vueFilesValue = token.content.match(vueFilesRegex)
-  const reactFilesValue = token.content.match(reactFilesRegex)
-  const htmlFilesValue = token.content.match(htmlFilesRegex)
-  const ssgValue = !!token.content.match(ssgRegex)?.[1]
-  const htmlWriteWayValue
-    = token.content.match(htmlWriteWayRegex)?.[1] || 'write'
-  const backgroundValue = token.content.match(backgroundRegex)?.[1]
+  // 获取Props相关参数（先匹配再提取值，兼容 key="value" 与 key value）
+  const titleMatch = token.content.match(titleRegex)
+  const vuePathMatch = token.content.match(vuePathRegex)
+  const htmlPathMatch = token.content.match(htmlPathRegex)
+  const reactPathMatch = token.content.match(reactPathRegex)
+  const descriptionMatch = token.content.match(descriptionRegex)
+  const orderMatch = token.content.match(orderRegex)
+  const selectMatch = token.content.match(selectRegex)
+  const githubMatch = token.content.match(githubRegex)
+  const gitlabMatch = token.content.match(gitlabRegex)
+  const stackblitzMatch = token.content.match(stackblitzRegex)
+  const codesandboxMatch = token.content.match(codesandboxRegex)
+  const codeplayerMatch = token.content.match(codeplayerRegex)
+  const scopeValue = getGroupValue(token.content.match(scopeRegex)) || ''
+  const vueFilesMatch = token.content.match(vueFilesRegex)
+  const reactFilesMatch = token.content.match(reactFilesRegex)
+  const htmlFilesMatch = token.content.match(htmlFilesRegex)
+  const ssgValue = !!getGroupValue(token.content.match(ssgRegex))
+  const htmlWriteWayValue = getGroupValue(token.content.match(htmlWriteWayRegex)) || 'write'
+  const backgroundValue = getGroupValue(token.content.match(backgroundRegex))
+
+  const titleValue = getGroupValue(titleMatch)
+  const vuePathValue = getGroupValue(vuePathMatch)
+  const htmlPathValue = getGroupValue(htmlPathMatch)
+  const reactPathValue = getGroupValue(reactPathMatch)
+  const descriptionValue = getGroupValue(descriptionMatch)
+  const orderValue = getGroupValue(orderMatch)
+  const selectValue = getGroupValue(selectMatch)
+  const githubValue = getGroupValue(githubMatch)
+  const gitlabValue = getGroupValue(gitlabMatch)
+  const stackblitzValue = getGroupValue(stackblitzMatch)
+  const codesandboxValue = getGroupValue(codesandboxMatch)
+  const codeplayerValue = getGroupValue(codeplayerMatch)
+  const vueFilesValue = getGroupValue(vueFilesMatch)
+  const reactFilesValue = getGroupValue(reactFilesMatch)
+  const htmlFilesValue = getGroupValue(htmlFilesMatch)
   const mdFilePath = mdFile.realPath ?? mdFile.path
   const dirPath = demoDir || path.dirname(mdFilePath)
 
-  if (orderValue?.[1]) {
-    order = orderValue[1]
+  if (orderValue) {
+    order = orderValue
   }
-  if (selectValue?.[1]) {
-    select = selectValue[1]
+  if (selectValue) {
+    select = selectValue
   }
   let github = ''
   let gitlab = ''
-  if (githubValue?.[1]) {
-    github = githubValue[1]
+  if (githubValue) {
+    github = githubValue
   }
-  if (gitlabValue?.[1]) {
-    gitlab = gitlabValue[1]
+  if (gitlabValue) {
+    gitlab = gitlabValue
   }
-  if (stackblitzValue?.[1]) {
-    stackblitz.show = stackblitzValue[1] === 'true'
+  if (stackblitzValue) {
+    stackblitz.show = stackblitzValue === 'true'
   }
-  if (codesandboxValue?.[1]) {
-    codesandbox.show = codesandboxValue[1] === 'true'
+  if (codesandboxValue) {
+    codesandbox.show = codesandboxValue === 'true'
   }
-  if (codeplayerValue?.[1]) {
-    codeplayer.show = codeplayerValue[1] === 'true'
+  if (codeplayerValue) {
+    codeplayer.show = codeplayerValue === 'true'
   }
 
-  if (vuePathRegexValue?.[1]) {
+  if (vuePathValue) {
     componentProps.vue = path
-      .join(dirPath, vuePathRegexValue[1])
+      .join(dirPath, vuePathValue)
       .replace(/\\/g, '/')
   }
 
-  if (htmlPathRegexValue?.[1]) {
+  if (htmlPathValue) {
     componentProps.html = path
-      .join(dirPath, htmlPathRegexValue[1])
+      .join(dirPath, htmlPathValue)
       .replace(/\\/g, '/')
   }
-  if (reactPathRegexValue?.[1]) {
+  if (reactPathValue) {
     componentProps.react = path
-      .join(dirPath, reactPathRegexValue[1])
+      .join(dirPath, reactPathValue)
       .replace(/\\/g, '/')
   }
 
-  componentProps.title = titleValue ? titleValue[1] : ''
-  componentProps.description = descriptionRegexValue
-    ? descriptionRegexValue[1]
-    : ''
+  componentProps.title = titleValue || ''
+  componentProps.description = descriptionValue || ''
 
   const componentVuePath = componentProps.vue
     ? path
         .resolve(
           demoDir || path.dirname(mdFilePath),
-          vuePathRegexValue?.[1] || '.',
+          vuePathValue || '.',
         )
         .replace(/\\/g, '/')
     : ''
@@ -245,7 +271,7 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
     ? path
         .resolve(
           demoDir || path.dirname(mdFilePath),
-          htmlPathRegexValue?.[1] || '.',
+          htmlPathValue || '.',
         )
         .replace(/\\/g, '/')
     : ''
@@ -253,7 +279,7 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
     ? path
         .resolve(
           demoDir || path.dirname(mdFilePath),
-          reactPathRegexValue?.[1] || '.',
+          reactPathValue || '.',
         )
         .replace(/\\/g, '/')
     : ''
@@ -399,13 +425,23 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
     if (!absPath)
       return
     try {
-      if (fs.existsSync(absPath)) {
-        const source = fs.readFileSync(absPath, 'utf-8')
-        highlightedCode[type] = renderHighlightedCode(
-          source,
-          resolveLangByFile(absPath, fallbackLangMap[type]),
-        )
+      if (!fs.existsSync(absPath))
+        return
+      let source = ''
+      try {
+        source = fs.readFileSync(absPath, 'utf-8')
       }
+      catch (_e) {
+        source = ''
+      }
+      if (!source) {
+        highlightedCode[type] = ''
+        return
+      }
+      highlightedCode[type] = renderHighlightedCode(
+        source,
+        resolveLangByFile(absPath, fallbackLangMap[type]),
+      )
     }
     catch (_error) {
       highlightedCode[type] = ''
@@ -424,9 +460,9 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
   }
 
   const inputFiles = {
-    vue: formatString(vueFilesValue?.[1] || ''),
-    react: formatString(reactFilesValue?.[1] || ''),
-    html: formatString(htmlFilesValue?.[1] || ''),
+    vue: formatString(vueFilesValue || ''),
+    react: formatString(reactFilesValue || ''),
+    html: formatString(htmlFilesValue || ''),
   }
 
   for (const key in inputFiles) {
@@ -458,15 +494,26 @@ export function transformPreview(md: MarkdownIt, token: Token, mdFile: any, conf
               .resolve(demoDir || path.dirname(mdFilePath), filePath || '.')
               .replace(/\\/g, '/')
             if (fs.existsSync(absPath)) {
-              const code = fs.readFileSync(absPath, 'utf-8')
-              files[key as keyof typeof files][file].code = code
-              files[key as keyof typeof files][file].html = renderHighlightedCode(
-                code,
-                resolveLangByFile(
-                  filePath,
-                  fallbackLangMap[key as keyof typeof fallbackLangMap],
-                ),
-              )
+              let code = ''
+              try {
+                code = fs.readFileSync(absPath, 'utf-8')
+              }
+              catch (_e) {
+                code = ''
+              }
+              if (!code) {
+                delete files[key as keyof typeof files][file]
+              }
+              else {
+                files[key as keyof typeof files][file].code = code
+                files[key as keyof typeof files][file].html = renderHighlightedCode(
+                  code,
+                  resolveLangByFile(
+                    filePath,
+                    fallbackLangMap[key as keyof typeof fallbackLangMap],
+                  ),
+                )
+              }
             }
             else {
               delete files[key as keyof typeof files][file]
