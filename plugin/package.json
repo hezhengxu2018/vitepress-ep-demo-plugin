@@ -23,11 +23,11 @@
     ".": {
       "import": "./dist/index.js"
     },
-    "./theme": {
-      "import": "./dist/theme/index.js"
+    "./theme/element-plus": {
+      "import": "./dist/theme/element-plus/index.js"
     },
-    "./theme/styles": {
-      "import": "./dist/theme/vitepress-ep-demo-plugin.css"
+    "./theme/element-plus/style": {
+      "import": "./dist/theme/element-plus/style.css"
     }
   },
   "types": "./dist/index.d.ts",
