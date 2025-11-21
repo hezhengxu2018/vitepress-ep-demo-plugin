@@ -15,9 +15,9 @@ import { useDefaultNameSpace } from '../../shared/utils/namespace';
 import {
   useDemoBox,
   type VitepressDemoBoxProps,
-} from '@/theme-shared/composables/useDemoBox';
-import { ComponentType } from '@/constant';
-import { i18n } from '@/theme-shared/locales/i18n';
+} from '@/shared/composables/useDemoBox';
+import { ComponentType } from '@/shared/constant';
+import { i18n } from '@/shared/locales/i18n';
 
 const props = withDefaults(defineProps<VitepressDemoBoxProps>(), {
   title: '标题',

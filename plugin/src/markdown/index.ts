@@ -2,13 +2,13 @@ import type MarkdownIt from 'markdown-it'
 import type MarkdownItContainer from 'markdown-it-container'
 import type Renderer from 'markdown-it/lib/renderer'
 import type Token from 'markdown-it/lib/token'
-import type { VitepressDemoBoxConfig } from './preview'
+import type { VitepressDemoBoxConfig } from '@/types'
 import fs from 'node:fs'
 import path from 'node:path'
 import { transformPreview } from './preview'
 import { demoReg } from './utils'
 
-export function vitepressDemoPlugin(md: MarkdownIt & any, params?: VitepressDemoBoxConfig) {
+export function vitepressDemoPlugin(md: MarkdownIt, params?: VitepressDemoBoxConfig) {
   const defaultHtmlInlineRender = md.renderer.rules.html_inline!
   const defaultHtmlBlockRender = md.renderer.rules.html_block!
   md.renderer.rules.html_inline = (

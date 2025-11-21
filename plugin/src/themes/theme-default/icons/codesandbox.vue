@@ -40,14 +40,13 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { getInitialFile } from '../../../shared/platform';
-import { getCodeSandboxParams } from '../../../shared/platform/sandbox';
+import { getInitialFile } from '@/shared/platform';
+import { getCodeSandboxParams } from '@/shared/platform/sandbox';
 import {
-  ComponentType,
   DEFAULT_DESCRIPTION,
   DEFAULT_TITLE,
-  PlatformTemplate,
-} from '@/constant';
+} from '@/shared/constant';
+import type { ComponentType, PlatformTemplate } from "@/types";
 
 const props = defineProps<{
   code: string;
