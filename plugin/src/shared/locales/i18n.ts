@@ -1,4 +1,4 @@
-import type { Locale, LocaleText } from './text'
+import type { Locale, LocaleText } from '@/types'
 import { ref } from 'vue'
 import { CN, EN } from './text'
 

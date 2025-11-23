@@ -1,4 +1,4 @@
-import type { LocaleText } from '../../types/index'
+import type { LocaleText } from '@/types'
 
 export const CN: LocaleText = {
   openInStackblitz: '在 Stackblitz 中打开',

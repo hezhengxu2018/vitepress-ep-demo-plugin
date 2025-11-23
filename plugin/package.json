@@ -21,6 +21,7 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/markdown/index.d.ts",
       "import": "./dist/markdown/index.js"
     },
     "./theme/element-plus": {
@@ -30,11 +31,9 @@
       "import": "./dist/theme/element-plus/style.css"
     }
   },
-  "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "src",
-    "theme"
+    "src"
   ],
   "scripts": {
     "build:plugin": "vite build -c ./vite.plugin.config.ts",
@@ -57,10 +56,12 @@
     "codesandbox": "2.2.3"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.55.0",
     "@types/markdown-it": "^12.2.3",
     "@types/markdown-it-container": "^2",
     "@types/node": "^20.4.2",
     "@vitejs/plugin-vue": "^6",
+    "unplugin-dts": "*",
     "unplugin-vue": "^7.0.5",
     "vite": "7.2.2",
     "vue-tsc": "^3.1.3"

@@ -1,5 +1,4 @@
-import type { Platform } from '../../markdown/preview'
-import type { ComponentType, VitepressDemoBoxProps } from '@/types'
+import type { ComponentType, Platform, VitepressDemoBoxProps } from '@/types'
 import {
   computed,
   nextTick,

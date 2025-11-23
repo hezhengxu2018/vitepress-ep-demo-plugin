@@ -8,7 +8,7 @@ import path from 'node:path'
 import { transformPreview } from './preview'
 import { demoReg } from './utils'
 
-export function vitepressDemoPlugin(md: MarkdownIt, params?: VitepressDemoBoxConfig) {
+export const vitepressDemoPlugin: MarkdownIt.PluginWithOptions<VitepressDemoBoxConfig> = (md, params) => {
   const defaultHtmlInlineRender = md.renderer.rules.html_inline!
   const defaultHtmlBlockRender = md.renderer.rules.html_block!
   md.renderer.rules.html_inline = (
