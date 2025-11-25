@@ -57,7 +57,7 @@ defineExpose({
 </template>
 
 <style lang="scss">
-@import '../style/var.scss';
+@use '../style/var.scss' as *;
 
 .#{$defaultPrefix}-message-notice__container {
   display: flex;

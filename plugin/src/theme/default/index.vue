@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { ComponentType, VitepressDemoBoxProps } from '@/types';
 import {
   CodeOpenIcon,
   CodeCloseIcon,
@@ -12,18 +13,15 @@ import {
 import { MessageService } from './message';
 import Tooltip from './tooltip/index.vue';
 import { useDefaultNameSpace } from '../../shared/utils/namespace';
-import {
-  useDemoBox,
-  type VitepressDemoBoxProps,
-} from '@/shared/composables/useDemoBox';
-import { ComponentType } from '@/shared/constant';
+import { useDemoBox } from '@/shared/composables/useDemoBox';
+import { COMPONENT_TYPE } from '@/shared/constant';
 import { i18n } from '@/shared/locales/i18n';
 
 const props = withDefaults(defineProps<VitepressDemoBoxProps>(), {
   title: '标题',
   description: '描述内容',
   visible: true,
-  select: ComponentType.VUE,
+  select: COMPONENT_TYPE.VUE,
   order: 'vue,react,html',
   github: '',
   gitlab: '',
@@ -39,22 +37,26 @@ const {
   tabs,
   isCodeFold,
   setCodeFold,
-  setCodeType,
   currentFiles,
   activeFile,
   currentCode,
-  displayCode,
+  currentCodeHtml,
   openGithub,
   openGitlab,
   clickCodeCopy,
   htmlContainerRef,
   reactContainerRef,
-  handleFileClick,
-  sourceRef,
-  sourceContentRef,
 } = useDemoBox(props, emit, {
   onCopySuccess: () => MessageService.open(i18n.value.copySuccess),
 });
+
+const setCodeType = (tab: ComponentType) => {
+  type.value = tab;
+};
+
+const handleFileClick = (file: string) => {
+  activeFile.value = file;
+};
 
 const ns = useDefaultNameSpace();
 </script>
@@ -88,7 +90,7 @@ const ns = useDefaultNameSpace();
           v-for="tab in tabs"
           :key="tab"
           :class="[ns.bem('tab'), type === tab && ns.bem('active-tab')]"
-          @click="setCodeType?.(tab)"
+          @click="setCodeType(tab)"
         >
           {{ tab }}
         </div>
@@ -129,26 +131,28 @@ const ns = useDefaultNameSpace();
     </section>
 
     <!-- 代码展示区 -->
-    <section :class="[ns.bem('source')]" ref="sourceRef">
-      <div ref="sourceContentRef">
+    <section
+      :class="[ns.bem('source'), { 'is-expanded': !isCodeFold }]"
+      v-show="!isCodeFold"
+    >
+      <div
+        :class="[ns.bem('file-tabs')]"
+        v-if="Object.keys(currentFiles).length"
+      >
         <div
-          :class="[ns.bem('file-tabs')]"
-          v-if="Object.keys(currentFiles).length"
+          v-for="file in Object.keys(currentFiles)"
+          :key="file"
+          :class="[
+            ns.bem('tab'),
+            activeFile === file && ns.bem('active-tab'),
+          ]"
+          @click="handleFileClick(file)"
         >
-          <div
-            v-for="file in Object.keys(currentFiles)"
-            :key="file"
-            :class="[
-              ns.bem('tab'),
-              activeFile === file && ns.bem('active-tab'),
-            ]"
-            @click="handleFileClick(file)"
-          >
-            {{ file }}
-          </div>
+          {{ file }}
         </div>
-        <pre class="language-html"><div v-html="displayCode"></div></pre>
       </div>
+      <div v-if="currentCodeHtml" v-html="currentCodeHtml"></div>
+      <pre v-else class="language-plaintext"><code>{{ currentCode || '' }}</code></pre>
     </section>
 
     <div :class="ns.bem('fold')" v-if="!isCodeFold" @click="setCodeFold(true)">
@@ -158,26 +162,17 @@ const ns = useDefaultNameSpace();
 </template>
 
 <style lang="scss">
-@import './style/var.scss';
-
-html.dark .shiki,
-html.dark .shiki span {
-  color: var(--shiki-dark) !important;
-  font-style: var(--shiki-dark-font-style) !important;
-  font-weight: var(--shiki-dark-font-weight) !important;
-  text-decoration: var(--shiki-dark-text-decoration) !important;
-}
-
-.#{$defaultPrefix}__container > * {
-  font-size: 14px;
-}
+@use './style/var.scss' as *;
 
 .#{$defaultPrefix}__container {
   div[class*='language-'] {
     margin-top: 0;
     margin-bottom: 0;
-    border-radius: 0;
-    background: var(--coot-demo-box-code-bg);
+  }
+
+  .language-html {
+    margin-top: 0;
+    margin-bottom: 0;
   }
 }
 
@@ -187,8 +182,6 @@ html.dark .shiki span {
   border: 1px solid var(--coot-demo-box-border);
   margin: 10px 0;
 
-  .#{$defaultPrefix}-preview,
-  .#{$defaultPrefix}-description,
   .#{$defaultPrefix}-source {
     width: 100%;
   }
@@ -251,26 +244,7 @@ html.dark .shiki span {
 .#{$defaultPrefix}__container > .#{$defaultPrefix}-source {
   transition: all 0.4s ease-in-out;
   overflow: hidden;
-  height: 0;
-
-  div[class*='language-'] {
-    margin-top: 0 !important;
-  }
-
-  .language-html {
-    margin: 0;
-    overflow-x: auto;
-
-    .shiki {
-      background-color: var(--vp-code-block-bg) !important;
-    }
-
-    code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-        Liberation Mono, Courier New, monospace;
-      padding: 0 24px;
-    }
-  }
+  border-top: 1px dashed var(--coot-demo-box-border);
 }
 
 .#{$defaultPrefix}__container > .#{$defaultPrefix}-fold {

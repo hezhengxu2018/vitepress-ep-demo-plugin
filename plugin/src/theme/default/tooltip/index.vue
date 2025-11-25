@@ -18,7 +18,7 @@ const props = defineProps<{
 </script>
 
 <style scoped lang="scss">
-@import '../style/var.scss';
+@use '../style/var.scss' as *;
 
 .#{$defaultPrefix}-tooltip__wrapper {
   position: relative;

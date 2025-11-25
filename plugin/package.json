@@ -24,11 +24,11 @@
       "types": "./dist/markdown/index.d.ts",
       "import": "./dist/markdown/index.js"
     },
-    "./theme/element-plus": {
-      "import": "./dist/theme/element-plus/index.js"
+    "./theme/*": {
+      "import": "./dist/theme/*/index.js"
     },
-    "./theme/element-plus/style": {
-      "import": "./dist/theme/element-plus/style.css"
+    "./theme/*/style": {
+      "import": "./dist/theme/*/style.css"
     }
   },
   "types": "./dist/markdown/index.d.ts",
@@ -65,6 +65,7 @@
     "unplugin-dts": "*",
     "unplugin-vue": "^7.0.5",
     "vite": "7.2.2",
+    "vite-plugin-lib-inject-css": "^2",
     "vue-tsc": "^3.1.3"
   }
 }

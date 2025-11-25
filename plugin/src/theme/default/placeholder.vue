@@ -12,7 +12,7 @@ const ns = useDefaultNameSpace('placeholder');
 </script>
 
 <style scoped lang="scss">
-@import './style/var.scss';
+@use './style/var.scss' as *;
 
 .#{$defaultPrefix}-placeholder__container {
   width: 100%;
