@@ -50,6 +50,12 @@ importers:
       '@emotion/styled':
         specifier: ^11.13.0
         version: 11.14.1(@emotion/react@11.14.0(@types/react@18.3.26)(react@18.3.1))(@types/react@18.3.26)(react@18.3.1)
+      '@types/markdown-it':
+        specifier: ^14
+        version: 14.1.2
+      '@types/markdown-it-container':
+        specifier: ^2
+        version: 2.0.10
       '@types/react':
         specifier: ^18.3.5
         version: 18.3.26
@@ -62,6 +68,9 @@ importers:
       element-plus:
         specifier: ^2.8.4
         version: 2.11.7(vue@3.5.24(typescript@5.9.3))
+      markdown-it-container:
+        specifier: ^4.0.0
+        version: 4.0.0
       postcss:
         specifier: ^8.4.49
         version: 8.5.6
@@ -97,7 +106,7 @@ importers:
         version: 2.11.7(vue@3.5.24(typescript@5.9.3))
       vitepress:
         specifier: '*'
-        version: 1.6.4(@algolia/client-search@5.43.0)(@types/node@20.19.25)(@types/react@18.3.26)(async-validator@4.2.5)(change-case@5.4.4)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.93.3)(sass@1.93.3)(search-insights@2.17.3)(typescript@5.9.3)
+        version: 1.6.4(@algolia/client-search@5.43.0)(@types/node@20.19.25)(async-validator@4.2.5)(change-case@5.4.4)(postcss@8.5.6)(sass-embedded@1.93.3)(sass@1.93.3)(search-insights@2.17.3)(typescript@5.9.3)
       vue:
         specifier: ^3.2.0
         version: 3.5.24(typescript@5.9.3)
@@ -3228,6 +3237,9 @@ packages:
   mark.js@8.11.1:
     resolution: {integrity: sha512-1I+1qpDt4idfgLQG+BNWmrqku+7/2bi5nLf4YwF8y8zXvmfiTBY3PV3ZibfrjBueCByROpuBjLLFCajqkgYoLQ==}
 
+  markdown-it-container@4.0.0:
+    resolution: {integrity: sha512-HaNccxUH0l7BNGYbFbjmGpf5aLHAMTinqRZQAEQbMr2cdD3z91Q6kIo1oUn1CQndkT03jat6ckrdRYuwwqLlQw==}
+
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
@@ -6160,7 +6172,7 @@ snapshots:
 
   '@types/markdown-it-container@2.0.10':
     dependencies:
-      '@types/markdown-it': 12.2.3
+      '@types/markdown-it': 14.1.2
 
   '@types/markdown-it@12.2.3':
     dependencies:
@@ -8232,6 +8244,8 @@ snapshots:
 
   mark.js@8.11.1: {}
 
+  markdown-it-container@4.0.0: {}
+
   markdown-table@3.0.4: {}
 
   math-intrinsics@1.1.0: {}
@@ -10065,7 +10079,7 @@ snapshots:
       sass-embedded: 1.93.3
       yaml: 2.8.1
 
-  vitepress@1.6.4(@algolia/client-search@5.43.0)(@types/node@20.19.25)(@types/react@18.3.26)(async-validator@4.2.5)(change-case@5.4.4)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.93.3)(sass@1.93.3)(search-insights@2.17.3)(typescript@5.9.3):
+  vitepress@1.6.4(@algolia/client-search@5.43.0)(@types/node@20.19.25)(async-validator@4.2.5)(change-case@5.4.4)(postcss@8.5.6)(sass-embedded@1.93.3)(sass@1.93.3)(search-insights@2.17.3)(typescript@5.9.3):
     dependencies:
       '@docsearch/css': 3.8.2
       '@docsearch/js': 3.8.2(@algolia/client-search@5.43.0)(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)

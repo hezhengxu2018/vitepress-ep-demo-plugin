@@ -1,8 +1,10 @@
+import type MarkdownIt from 'markdown-it'
 import type { VitepressDemoBoxConfig } from 'vitepress-ep-demo-plugin'
 import path, { dirname } from 'node:path'
 import process from 'node:process'
+import mdContainer from 'markdown-it-container'
 import { defineConfig } from 'vitepress'
-import { vitepressDemoPlugin } from 'vitepress-ep-demo-plugin'
+import { createDemoContainer, vitepressDemoPlugin } from 'vitepress-ep-demo-plugin'
 
 function fileURLToPath(fileURL: string) {
   let filePath = fileURL
@@ -58,7 +60,7 @@ export default defineConfig({
     },
   },
   markdown: {
-    config(md) {
+    config(md: MarkdownIt) {
       md.use<VitepressDemoBoxConfig>(vitepressDemoPlugin, {
         demoDir: path.resolve(
           dirname(fileURLToPath(import.meta.url)),
@@ -87,6 +89,7 @@ export default defineConfig({
           ],
         },
       })
+      md.use(mdContainer, 'demo', createDemoContainer(md))
     },
   },
 })
