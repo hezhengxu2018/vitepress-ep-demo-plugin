@@ -27,6 +27,35 @@ import 'element-plus/dist/index.css'
 const app = createApp(Demo);
 app.mount("#app");`
 
+const vitepressDemoPluginConfig: VitepressDemoBoxConfig = {
+  demoDir: path.resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    '../demos',
+  ),
+  stackblitz: {
+    show: true,
+    templates: [
+      {
+        scope: 'element',
+        files: {
+          'src/main.ts': srcMain,
+        },
+      },
+    ],
+  },
+  codesandbox: {
+    show: false,
+    templates: [
+      {
+        scope: 'element',
+        files: {
+          'src/main.ts': srcMain,
+        },
+      },
+    ],
+  },
+}
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'Vitepress EP Demo Plugin',
@@ -61,35 +90,8 @@ export default defineConfig({
   },
   markdown: {
     config(md: MarkdownIt) {
-      md.use<VitepressDemoBoxConfig>(vitepressDemoPlugin, {
-        demoDir: path.resolve(
-          dirname(fileURLToPath(import.meta.url)),
-          '../demos',
-        ),
-        stackblitz: {
-          show: true,
-          templates: [
-            {
-              scope: 'element',
-              files: {
-                'src/main.ts': srcMain,
-              },
-            },
-          ],
-        },
-        codesandbox: {
-          show: false,
-          templates: [
-            {
-              scope: 'element',
-              files: {
-                'src/main.ts': srcMain,
-              },
-            },
-          ],
-        },
-      })
-      md.use(mdContainer, 'demo', createDemoContainer(md))
+      md.use(mdContainer, 'demo', createDemoContainer(md, vitepressDemoPluginConfig))
+      md.use<VitepressDemoBoxConfig>(vitepressDemoPlugin, vitepressDemoPluginConfig)
     },
   },
 })

@@ -16,7 +16,7 @@ export default defineConfig({
     outDir: 'dist/markdown',
     emptyOutDir: true,
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: resolve(__dirname, 'src/markdown/index.ts'),
       formats: ['es'],
       fileName: 'index',
     },

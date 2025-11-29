@@ -9,4 +9,4 @@ export default {
   enhanceApp({ app }) {
     app.use(ElementPlus)
   },
-}
+} as typeof Theme

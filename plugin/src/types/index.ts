@@ -168,10 +168,15 @@ export interface VitepressDemoBoxConfig {
    */
   autoImportWrapper?: boolean
   /**
-   * @cn 自定义包裹组件的组件名称，需自行注册，仅在启用 isCustomWrapper 时有效
-   * @en The custom component name of the preview component， need to be registered by yourself, only valid when isCustomWrapper is enabled
+   * @cn 自定义包裹组件的组件名称，需自行注册
+   * @en The custom component name of the preview component， need to be registered by yourself
    */
   wrapperComponentName?: string
+  /**
+   * @cn 自定义加载组件的组件名称，需自行注册
+   * @en The custom component name of the preview loading component， need to be registered by yourself
+   */
+  placeholderComponentName?: string
 }
 
 export type MarkdownRule = MarkdownRenderer['renderer']['rules']['html_inline']

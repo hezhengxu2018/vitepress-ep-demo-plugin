@@ -1,3 +1,5 @@
+import type Token from 'markdown-it/lib/token'
+
 /* eslint-disable regexp/no-contradiction-with-assertion */
 // <demo></demo> or <demo />
 export const demoReg = [
@@ -128,4 +130,183 @@ export function composeComponentName(path: string) {
         ),
       ).replace(/=/g, 'Equal')}`
   )
+}
+
+export const DEMO_ATTR_PLACEHOLDER = 'demo_attr_placeholder'
+
+/**
+ * Collects attribute-like text lines contained in a :::demo block.
+ * @param tokens Markdown-it token list
+ * @param startIdx Index of the opening container token
+ */
+export function collectDemoAttributeLines(tokens: Token[], startIdx: number) {
+  const lines: string[] = []
+  const closeIdx = findContainerCloseIndex(tokens, startIdx)
+  if (closeIdx === -1)
+    return lines
+  for (let i = startIdx + 1; i < closeIdx; i++) {
+    const token = tokens[i]
+    if (token.type === 'inline') {
+      const segments = token.children?.length
+        ? token.children
+            .filter(child => child.type === 'text')
+            .map(child => child.content)
+        : [token.content]
+      segments
+        .join('\n')
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .forEach(line => lines.push(line))
+    }
+    neutralizeToken(token)
+  }
+  return lines
+}
+
+/**
+ * Normalizes collected lines into canonical `key="value"` attribute strings.
+ * Supports shorthand vue paths and whitespace-delimited attributes.
+ * @param lines Raw attribute lines
+ */
+export function normalizeDemoAttributeLines(lines: string[]) {
+  const normalized = lines
+    .map(line => line.trim())
+    .filter(Boolean)
+  if (!normalized.length)
+    return normalized
+  if (!looksLikeAttributeLine(normalized[0])) {
+    const vuePath = ensureVuePath(normalized.shift() || '')
+    if (vuePath)
+      normalized.unshift(`vue="${escapeAttributeValue(vuePath)}"`)
+  }
+  return normalized.map(line => normalizeAttributeLine(line))
+}
+
+/**
+ * Extracts the inline description that follows `demo` in the container info string.
+ * @param info Markdown-it container info string
+ */
+export function extractContainerDescription(info: string) {
+  const trimmed = (info || '').trim()
+  if (!trimmed.toLowerCase().startsWith('demo'))
+    return ''
+  const description = trimmed.slice(4).trim()
+  return description
+}
+
+/**
+ * Checks whether description attribute already exists in the attribute list.
+ * @param lines Normalized attribute lines
+ */
+export function hasDescriptionAttr(lines: string[]) {
+  return lines.some(line => /^description(?:=|\s)/.test(line.trim()))
+}
+
+/**
+ * Escapes characters that are unsafe in HTML attribute values.
+ * @param value Attribute value to escape
+ */
+export function escapeAttributeValue(value: string) {
+  const replacements: Record<string, string> = {
+    '&': '&amp;',
+    '"': '&quot;',
+    '\'': '&#39;',
+    '<': '&lt;',
+    '>': '&gt;',
+  }
+  return value.replace(/[&"'<>]/g, char => replacements[char])
+}
+
+/**
+ * Tests whether a line already looks like an attribute declaration.
+ * Accepts both `key=value` and `key value` styles.
+ * @param line Line to test
+ */
+function looksLikeAttributeLine(line: string) {
+  return /^[A-Z_][\w:-]*\s*=/i.test(line) || /^[A-Z_][\w:-]*\s+.+/i.test(line)
+}
+
+/**
+ * Ensures the shorthand path is treated as a Vue file path, appending `.vue` if needed.
+ * @param raw Raw path text
+ */
+function ensureVuePath(raw: string) {
+  const trimmed = raw.replace(/^['"]|['"]$/g, '').trim()
+  if (!trimmed)
+    return ''
+  return trimmed.endsWith('.vue') ? trimmed : `${trimmed}.vue`
+}
+
+/**
+ * Converts a raw attribute declaration into `key="value"` format with escaping applied.
+ * @param line Raw attribute declaration line
+ */
+function normalizeAttributeLine(line: string) {
+  const equalsMatch = /^([A-Z_][\w:-]*)\s*=(\S.*)$/i.exec(line)
+  if (equalsMatch) {
+    const [, key, rawValue] = equalsMatch
+    return `${key}="${escapeAttributeValue(stripOuterQuotes(rawValue.trim()))}"`
+  }
+  const spaceMatch = /^([A-Z_][\w:-]*)\s+(\S.*)$/i.exec(line)
+  if (spaceMatch) {
+    const [, key, rawValue] = spaceMatch
+    return `${key}="${escapeAttributeValue(stripOuterQuotes(rawValue.trim()))}"`
+  }
+  return line
+}
+
+/**
+ * Removes wrapping quotes from a string if both ends match.
+ * @param value Value that may contain surrounding quotes
+ */
+function stripOuterQuotes(value: string) {
+  if (!value)
+    return value
+  const first = value[0]
+  const last = value[value.length - 1]
+  if ((first === '"' && last === '"') || (first === '\'' && last === '\''))
+    return value.slice(1, -1)
+  return value
+}
+
+/**
+ * Finds the matching closing token index for a demo container, accounting for nesting.
+ * @param tokens Markdown-it tokens
+ * @param startIdx Index of the container open token
+ */
+function findContainerCloseIndex(tokens: Token[], startIdx: number) {
+  if (!Array.isArray(tokens) || startIdx < 0 || startIdx >= tokens.length)
+    return -1
+  const startToken = tokens[startIdx]
+  if (!startToken || startToken.type !== 'container_demo_open')
+    return -1
+  let depth = 0
+  for (let i = startIdx + 1; i < tokens.length; i++) {
+    const token = tokens[i]
+    if (token.type === 'container_demo_open') {
+      depth++
+      continue
+    }
+    if (token.type === 'container_demo_close') {
+      if (depth === 0)
+        return i
+      depth--
+    }
+  }
+  return -1
+}
+
+/**
+ * Replaces a token with a placeholder so it does not render output.
+ * @param token Token to neutralize
+ */
+function neutralizeToken(token: Token) {
+  token.type = DEMO_ATTR_PLACEHOLDER
+  token.tag = ''
+  token.nesting = 0
+  token.block = false
+  token.hidden = true
+  token.content = ''
+  token.children = []
 }

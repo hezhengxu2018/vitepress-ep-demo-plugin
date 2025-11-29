@@ -23,6 +23,7 @@ const ssgRegex = /ssg(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
 const htmlWriteWayRegex = /htmlWriteWay(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
 const backgroundRegex = /background(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
 const wrapperComponentNameRegex = /wrapperComponentName(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
+const placeholderComponentNameRegex = /placeholderComponentName(?:=|\s+)(?<value>"[^"]*"|'[^']*'|[^\s"'>]+)/
 // 保持 files 的正则组结构，仅允许 = 或 空格 分割；把整体值放到命名捕获组 value 中（包含两侧引号）
 const vueFilesRegex = /vueFiles(?:=|\s+)(?<value>"(?:\{(?:.|\n)*?\}|\[(?:.|\n)*?\])")/
 const reactFilesRegex = /reactFiles(?:=|\s+)(?<value>"(?:\{(?:.|\n)*?\}|\[(?:.|\n)*?\])")/
@@ -71,6 +72,7 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
     codesandbox = { show: false },
     codeplayer = { show: false },
     wrapperComponentName = 'vitepress-ep-demo-box',
+    placeholderComponentName = 'vitepress-ep-demo-placeholder',
     autoImportWrapper = true,
   } = config || {}
   let {
@@ -104,7 +106,9 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
   const reactFilesValue = extractValue(token.content, reactFilesRegex)
   const htmlFilesValue = extractValue(token.content, htmlFilesRegex)
   const wrapperComponentNameValue = extractValue(token.content, wrapperComponentNameRegex)
+  const placeholderComponentNameValue = extractValue(token.content, placeholderComponentNameRegex)
   const wrapperName = wrapperComponentNameValue || wrapperComponentName
+  const placeholderName = placeholderComponentNameValue || placeholderComponentName
   const scopeValue = extractValue(token.content, scopeRegex) || ''
   const ssgValue = extractFlag(token.content, ssgRegex)
   const htmlWriteWayValue = extractValue(token.content, htmlWriteWayRegex, 'write')
@@ -454,7 +458,7 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
   ${
     ssgValue
       ? ''
-      : `<vitepress-demo-placeholder v-show="${placeholderVisibleKey}" />`
+      : `<${placeholderName} v-show="${placeholderVisibleKey}" />`
   }
   ${ssgValue ? '' : '<ClientOnly>'}
     <${wrapperName}

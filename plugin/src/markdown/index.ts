@@ -4,10 +4,16 @@ import type {
   MarkdownRule,
   VitepressDemoBoxConfig,
 } from '@/types'
-import fs from 'node:fs'
-import path from 'node:path'
 import { transformPreview } from './preview'
-import { demoReg } from './utils'
+import {
+  collectDemoAttributeLines,
+  DEMO_ATTR_PLACEHOLDER,
+  demoReg,
+  escapeAttributeValue,
+  extractContainerDescription,
+  hasDescriptionAttr,
+  normalizeDemoAttributeLines,
+} from './utils'
 
 export function vitepressDemoPlugin(md: MarkdownRenderer, params?: VitepressDemoBoxConfig) {
   const defaultHtmlInlineRender = md.renderer.rules.html_inline!
@@ -15,7 +21,7 @@ export function vitepressDemoPlugin(md: MarkdownRenderer, params?: VitepressDemo
 
   const htmlInlineRule: MarkdownRule = (tokens, idx, options, mdFile, self) => {
     const token = tokens[idx]
-    // 删除注释使注释的 demo 不生�?
+    // 删除注释使注释的 demo 不生效
     token.content = token.content.replace(/<!--[\s\S]*?-->/g, '')
     if (demoReg.some(reg => reg.test(token.content))) {
       return transformPreview(md, token, mdFile, params)
@@ -50,36 +56,42 @@ interface ContainerOptions {
   ) => string
 }
 
-export function createDemoContainer(md: MarkdownRenderer, params?: VitepressDemoBoxConfig): ContainerOptions {
+export function createDemoContainer(md: MarkdownRenderer, pluginConfig?: VitepressDemoBoxConfig): ContainerOptions {
+  if (!md.renderer.rules[DEMO_ATTR_PLACEHOLDER])
+    md.renderer.rules[DEMO_ATTR_PLACEHOLDER] = () => ''
   return {
     validate(params) {
       return !!/^demo.*$/.test(params.trim())
     },
 
-    render(tokens, idx) {
-      const m = tokens[idx].info.trim().match(/^demo.*$/)
+    render(tokens, idx, _options, env) {
       if (tokens[idx].nesting === 1 /* means the tag is opening */) {
-        const description = m && m.length > 1 ? m[1] : ''
-        const sourceFileToken = tokens[idx + 2]
-        let source = ''
-        const sourceFile = sourceFileToken.children?.[0].content ?? ''
-        console.log('sourceFile', sourceFile)
-        console.log('sourceFileToken', sourceFileToken)
-        // if (sourceFileToken.type === 'inline') {
-        //   source = fs.readFileSync(
-        //     path.resolve('./docs/zh-CN/demos', `${sourceFile}.vue`),
-        //     'utf8',
-        //   )
-        // }
-        // if (!source)
-        //   throw new Error(`Incorrect source file: ${sourceFile}`)
-
-        return `<div class="demo-box"> demo-box`
+        const attributeLines = normalizeDemoAttributeLines(
+          collectDemoAttributeLines(tokens, idx),
+        )
+        const descriptionFromInfo = extractContainerDescription(
+          tokens[idx].info,
+        )
+        if (descriptionFromInfo && !hasDescriptionAttr(attributeLines)) {
+          attributeLines.push(
+            `description="${escapeAttributeValue(descriptionFromInfo)}"`,
+          )
+        }
+        const attrs = attributeLines.length ? ` ${attributeLines.join(' ')}` : ''
+        const token = tokens[idx]
+        const previousContent = token.content
+        token.content = `<demo${attrs} />`
+        try {
+          return transformPreview(md, token, env, pluginConfig)
+        }
+        finally {
+          token.content = previousContent
+        }
       }
-      else {
-        return '</div>'
-      }
+      return ''
     },
 
   }
 }
+
+export type { VitepressDemoBoxConfig } from '../types'
