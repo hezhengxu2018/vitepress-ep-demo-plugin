@@ -1,9 +1,9 @@
 {
-  "name": "monorepo-vitepress-ep-demo-plugin",
+  "name": "monorepo-vitepress-better-demo-plugin",
   "type": "module",
   "version": "1.0.0",
   "packageManager": "pnpm@10.2.0",
-  "description": "vitepress-ep-demo-plugin monorepo.",
+  "description": "vitepress-better-demo-plugin monorepo.",
   "author": "Hezhengxu",
   "license": "MIT",
   "scripts": {

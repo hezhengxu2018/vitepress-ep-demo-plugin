@@ -1,5 +1,5 @@
 {
-  "name": "vitepress-ep-demo-plugin",
+  "name": "vitepress-better-demo-plugin",
   "type": "module",
   "version": "0.0.0",
   "description": "A vitepress plugin to preview component and display code",

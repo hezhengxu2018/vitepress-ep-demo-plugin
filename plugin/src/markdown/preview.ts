@@ -201,10 +201,10 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
   if (autoImportWrapper) {
     injectComponentImportScript(
       mdFile,
-      'vitepress-ep-demo-plugin/theme/element-plus',
+      'vitepress-better-demo-plugin/theme/element-plus',
       `{ VitepressEpDemoPlaceholder, VitepressEpDemoBox }`,
     )
-    injectComponentImportScript(mdFile, 'vitepress-ep-demo-plugin/theme/element-plus/style')
+    injectComponentImportScript(mdFile, 'vitepress-better-demo-plugin/theme/element-plus/style')
   }
 
   injectComponentImportScript(mdFile, 'vue', '{ ref, shallowRef, onMounted }')
