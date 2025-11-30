@@ -58,12 +58,9 @@ const vitepressDemoPluginConfig: VitepressDemoBoxConfig = {
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: 'Vitepress EP Demo Plugin',
-  description: 'The docs of vitepress-demo-plugin',
+  title: 'Vitepress Better Demo Plugin',
+  description: 'The docs of vitepress-better-demo-plugin',
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
-    logo: '/logo.svg',
-
     sidebar: [
       {
         text: '指南',
@@ -78,7 +75,7 @@ export default defineConfig({
     socialLinks: [
       {
         icon: 'github',
-        link: 'https://github.com/zh-lx/vitepress-demo-plugin',
+        link: 'https://github.com/hezhengxu2018/vitepress-better-demo-plugin',
       },
     ],
   },

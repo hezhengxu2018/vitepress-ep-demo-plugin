@@ -3,9 +3,8 @@
 layout: home
 
 hero:
-  name: Vitepress Demo Plugin
-  text: 实时预览你的DEMO
-  tagline: Vue, React, and HTML 都支持
+  name: Vitepress Better Demo Plugin
+  tagline: 更好的 Vitepress Demo Plugin
   actions:
     - theme: brand
       text: 快速开始
@@ -17,10 +16,16 @@ hero:
       src: /logo.svg
       alt: ChoDocs
 features:
-  - title: 安装便捷
-    details: 仅需几行代码，就可以在你的 vitepress 站点中添加使用
-  - title: 多语法支持
-    details: 支持 vue/react/html 等多种语法的 demo 展示与渲染
-  - title: 功能丰富
-    details: 一体化支持代码展示/Demo渲染/代码复制/跳转到第三方平台
+  - title: 完整的TS支持
+    details: 完整的配置项提示，优化开发体验
+  - title: 多主题支持
+    details: 支持自定义主题，内置默认与Element-Plus两套主题
+  - title: markdown-it-container 支持
+    details: 新增 markdown-it-container 的书写方式
+  - title: 使用内置的代码渲染
+    details: 在Vitepress中配置的shiki也会用于本插件中的代码。
 ---
+
+## 介绍
+
+本插件fork自`vitepress-demo-plugin`的1.5.0版本，在此基础上添加了上述特性，除此之外没有新增额外的功能。如果不需要这些特性，或者更倾向于使用独立的shiki渲染也可以使用[vitepress-demo-plugin](https://github.com/zh-lx/vitepress-demo-plugin)
