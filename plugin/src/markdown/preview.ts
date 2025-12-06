@@ -71,8 +71,8 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
     stackblitz = { show: false },
     codesandbox = { show: false },
     codeplayer = { show: false },
-    wrapperComponentName = 'vitepress-ep-demo-box',
-    placeholderComponentName = 'vitepress-ep-demo-placeholder',
+    wrapperComponentName = 'vitepress-demo-box',
+    placeholderComponentName = 'vitepress-demo-placeholder',
     autoImportWrapper = true,
   } = config || {}
   let {
@@ -201,10 +201,10 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
   if (autoImportWrapper) {
     injectComponentImportScript(
       mdFile,
-      'vitepress-better-demo-plugin/theme/element-plus',
-      `{ VitepressEpDemoPlaceholder, VitepressEpDemoBox }`,
+      'vitepress-better-demo-plugin/theme/default',
+      `{ VitepressDemoPlaceholder, VitepressDemoBox }`,
     )
-    injectComponentImportScript(mdFile, 'vitepress-better-demo-plugin/theme/element-plus/style')
+    injectComponentImportScript(mdFile, 'vitepress-better-demo-plugin/theme/default/style')
   }
 
   injectComponentImportScript(mdFile, 'vue', '{ ref, shallowRef, onMounted }')

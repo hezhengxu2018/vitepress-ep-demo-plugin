@@ -10,12 +10,14 @@ const ns = useDefaultNameSpace()
 
 <template>
   <div :class="[ns.bem('tooltip', 'wrapper')]">
+    <div :class="[ns.bem('tooltip', 'trigger')]">
+      <slot />
+    </div>
     <div :class="[ns.bem('tooltip', 'content')]">
       <slot name="content">
         {{ props.content }}
       </slot>
     </div>
-    <slot />
   </div>
 </template>
 
@@ -33,11 +35,12 @@ const ns = useDefaultNameSpace()
 .#{$defaultPrefix}-tooltip__wrapper {
   position: relative;
   display: inline-block;
-  &:hover {
-    .#{$defaultPrefix}-tooltip__content {
-      opacity: 1;
-    }
-  }
+}
+
+.#{$defaultPrefix}-tooltip__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .#{$defaultPrefix}-tooltip__content {
@@ -53,5 +56,9 @@ const ns = useDefaultNameSpace()
   opacity: 0;
   font-size: 12px;
   transition: opacity 0.2s ease-in-out;
+}
+
+.#{$defaultPrefix}-tooltip__trigger:hover + .#{$defaultPrefix}-tooltip__content {
+  opacity: 1;
 }
 </style>
