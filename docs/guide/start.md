@@ -146,7 +146,7 @@ npm install react react-dom -D
 <demo
   vue="../demos/demo.vue"
   github="https://github.com/hezhengxu2018/vitepress-better-demo-plugin/blob/main/docs/demos/demo.vue" 
-/>  
+/>
 ```
 
 其对应的渲染效果如下：
@@ -168,7 +168,7 @@ Gitlab 的使用方式和 Github 一致，只需将 `github` 属性替换为 `gi
 <demo
   vue="../demos/demo.vue"
   ssg="true"
-/>  
+/>
 ```
 
 其对应的渲染效果如下：

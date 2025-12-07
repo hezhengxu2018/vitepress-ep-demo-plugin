@@ -77,6 +77,14 @@ export default defineConfig({
           { text: 'Element Plus', link: '/components/element-plus' },
         ],
       },
+      {
+        text: '增强功能',
+        items: [
+          { text: 'Typescript 类型提示', link: '/what-is-new/typescript-hint' },
+          { text: 'Vitepress的代码染色', link: '/what-is-new/vitepress-code-renderer' },
+          { text: '多主题支持', link: '/what-is-new/multiple-themes' },
+        ],
+      },
     ],
 
     outline: [2, 4],
