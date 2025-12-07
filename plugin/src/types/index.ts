@@ -49,6 +49,7 @@ export interface VitepressDemoBoxProps {
   gitlab?: string
   reactCreateElement?: any
   reactCreateRoot?: any
+  reactUseLayoutEffect?: any
   stackblitz?: string
   codesandbox?: string
   codeplayer?: string

@@ -222,7 +222,7 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
     injectComponentImportScript(
       mdFile,
       'react',
-      '{ createElement as reactCreateElement }',
+      '{ createElement as reactCreateElement, useLayoutEffect as reactUseLayoutEffect }',
     )
     injectComponentImportScript(
       mdFile,
@@ -462,6 +462,7 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
   }
   ${ssgValue ? '' : '<ClientOnly>'}
     <${wrapperName}
+      v-show="!${placeholderVisibleKey}"
       title="${componentProps.title}"
       description="${componentProps.description}"
       locale="${locale}"
@@ -503,6 +504,7 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
             :reactComponent="${reactComponentName}"
             :reactCreateRoot="reactCreateRoot"
             :reactCreateElement="reactCreateElement"
+            :reactUseLayoutEffect="reactUseLayoutEffect"
             `
           : ''
       }
@@ -511,7 +513,7 @@ export function transformPreview(md: MarkdownRenderer, token: Token, mdFile: any
         componentProps.vue
           ? `
             <template v-if="${componentName}" #vue>
-              <${componentName}></${componentName}>
+              <${componentName} @vue:mounted="() => { ${placeholderVisibleKey} = false; }"></${componentName}>
             </template>
             `
           : ''

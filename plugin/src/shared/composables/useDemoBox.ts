@@ -166,6 +166,14 @@ export function useDemoBox(
         .join('\n')
       let iframeDocument
         = iframe.contentDocument || iframe.contentWindow?.document
+      let htmlMounted = false
+      const markHtmlMounted = () => {
+        if (htmlMounted) {
+          return
+        }
+        htmlMounted = true
+        emit('mount')
+      }
       if (
         typeof iframeDocument?.write === 'function'
         && props.htmlWriteWay === 'write'
@@ -179,6 +187,7 @@ export function useDemoBox(
           }),
         )
         iframeDocument.close()
+        markHtmlMounted()
       }
       else {
         iframe.srcdoc = genHtmlCode({
@@ -189,6 +198,7 @@ export function useDemoBox(
         iframe.onload = () => {
           iframeDocument
             = iframe.contentDocument || iframe.contentWindow?.document
+          markHtmlMounted()
         }
       }
 
@@ -197,6 +207,7 @@ export function useDemoBox(
           if (!iframeDocument) {
             return
           }
+          markHtmlMounted()
           const height = `${iframeDocument.documentElement.offsetHeight}px`
           iframe.style.height = height
           if (htmlContainerRef.value) {
@@ -215,16 +226,79 @@ export function useDemoBox(
     })
   }
 
+  interface ReactDemoBridgeProps {
+    component: any
+    reactCreateElement?: (...args: any[]) => any
+    reactUseLayoutEffect?: (effect: () => void, deps?: any[]) => void
+    onReady?: () => void
+  }
+
+  const ReactDemoBridge = (bridgeProps: ReactDemoBridgeProps) => {
+    const {
+      component,
+      reactCreateElement,
+      reactUseLayoutEffect,
+      onReady,
+    } = bridgeProps
+    const notifyReady = () => {
+      onReady?.()
+    }
+    if (reactUseLayoutEffect) {
+      reactUseLayoutEffect(() => {
+        notifyReady()
+      }, [])
+    }
+    else {
+      notifyReady()
+    }
+    return reactCreateElement
+      ? reactCreateElement(component, {})
+      : null
+  }
+
   const reactContainerRef = ref<HTMLElement | null>(null)
   let root: any = null
-  function renderReactComponent() {
-    nextTick(() => {
-      if (props.reactComponent && type.value === 'react' && props.reactCode) {
+  function renderReactComponent(): Promise<void> {
+    return new Promise((resolve) => {
+      nextTick(() => {
+        if (
+          !props.reactComponent
+          || type.value !== COMPONENT_TYPE.REACT
+          || !props.reactCode
+          || !reactContainerRef.value
+          || !props.reactCreateRoot
+          || !props.reactCreateElement
+        ) {
+          resolve()
+          return
+        }
         if (!root) {
           root = props.reactCreateRoot(reactContainerRef.value)
         }
-        root.render(props.reactCreateElement(props.reactComponent, {}, null))
-      }
+        let resolved = false
+        const handleReady = () => {
+          if (resolved) {
+            return
+          }
+          resolved = true
+          resolve()
+          emit('mount')
+        }
+        try {
+          root.render(
+            props.reactCreateElement(ReactDemoBridge, {
+              component: props.reactComponent,
+              reactCreateElement: props.reactCreateElement,
+              reactUseLayoutEffect: props.reactUseLayoutEffect,
+              onReady: handleReady,
+            }),
+          )
+        }
+        catch (error) {
+          console.error(error)
+          resolve()
+        }
+      })
     })
   }
 
@@ -245,8 +319,8 @@ export function useDemoBox(
   watch(
     () => props.reactCode,
     (val?: string, prevVal?: string) => {
-      if (val && val !== prevVal && root) {
-        root.render(props.reactCreateElement(props.reactComponent, {}, null))
+      if (val && val !== prevVal) {
+        renderReactComponent()
       }
     },
     { immediate: true, deep: true },
@@ -289,7 +363,6 @@ export function useDemoBox(
   }
 
   onMounted(() => {
-    emit('mount')
     initI18n(props.locale)
     observeI18n()
   })

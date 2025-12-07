@@ -56,6 +56,7 @@ const ns = useDefaultNameSpace()
   opacity: 0;
   font-size: 12px;
   transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
 }
 
 .#{$defaultPrefix}-tooltip__trigger:hover + .#{$defaultPrefix}-tooltip__content {
