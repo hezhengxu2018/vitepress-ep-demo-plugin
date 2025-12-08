@@ -127,6 +127,16 @@ export default defineConfig({
               { text: 'Element Plus', link: '/en/components/element-plus' },
             ],
           },
+          {
+            text: 'Enhancements',
+            items: [
+              { text: 'TypeScript Intellisense', link: '/en/what-is-new/typescript-hint' },
+              { text: 'VitePress Code Highlighting', link: '/en/what-is-new/vitepress-code-renderer' },
+              { text: 'Multiple Themes', link: '/en/what-is-new/multiple-themes' },
+              { text: 'Build Your Own Wrapper', link: '/en/what-is-new/develop-your-own-wrapper' },
+              { text: 'markdown-it-container Support', link: '/en/what-is-new/markdown-it-container-support' },
+            ],
+          },
         ],
         outline: [2, 4],
         socialLinks: [
