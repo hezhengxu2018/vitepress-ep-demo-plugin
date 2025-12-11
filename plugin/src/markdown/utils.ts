@@ -1,4 +1,278 @@
 import type Token from 'markdown-it/lib/token'
+import type { CodeFiles } from '@/types'
+
+export type AttributeMap = Record<string, unknown>
+
+export function parseDemoAttributes(content: string): AttributeMap {
+  const attributes: AttributeMap = {}
+  const source = extractDemoAttributeSource(content)
+  if (!source)
+    return attributes
+  const fragments = mergeAttributeTokens(splitAttributeTokens(source))
+  for (const fragment of fragments) {
+    // eslint-disable-next-line regexp/no-super-linear-backtracking
+    const match = /^([^\s=]+)(?:\s*=\s*([\s\S]+))?$/.exec(fragment)
+    if (!match)
+      continue
+    let [, rawKey, rawValue = 'true'] = match
+    rawKey = rawKey.trim()
+    if (!rawKey)
+      continue
+    let isBound = false
+    if (rawKey.startsWith('v-bind:')) {
+      rawKey = rawKey.slice(7)
+      isBound = true
+    }
+    else if (rawKey.startsWith(':')) {
+      rawKey = rawKey.slice(1)
+      isBound = true
+    }
+    if (!rawKey)
+      continue
+    const normalizedValue = stripOuterQuotes((rawValue ?? '').trim())
+    attributes[rawKey] = isBound
+      ? coerceBoundExpression(normalizedValue)
+      : normalizedValue
+  }
+  return attributes
+}
+
+export function toStringAttr(value: unknown, defaultValue = '') {
+  if (value === undefined || value === null)
+    return defaultValue
+  if (typeof value === 'string')
+    return value.trim()
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value)
+  return defaultValue
+}
+
+export function toPathAttr(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+export function toBoolean(value: unknown, defaultValue = false) {
+  if (value === undefined || value === null)
+    return defaultValue
+  if (typeof value === 'boolean')
+    return value
+  if (typeof value === 'number')
+    return value !== 0
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase()
+    if (!normalized)
+      return defaultValue
+    if (normalized === 'false' || normalized === '0')
+      return false
+    if (normalized === 'true' || normalized === '1')
+      return true
+    return true
+  }
+  return defaultValue
+}
+
+export function parseFilesAttribute(input: unknown): CodeFiles | undefined {
+  if (input == null || input === '')
+    return undefined
+  if (Array.isArray(input))
+    return input as CodeFiles
+  if (isPlainObject(input))
+    return input as CodeFiles
+  if (typeof input === 'string') {
+    const { success, value } = tryParseJsonLike(input)
+    if (success && (Array.isArray(value) || isPlainObject(value)))
+      return value as CodeFiles
+  }
+  return undefined
+}
+
+export function applyPlatformValue(target: { show: boolean, [key: string]: any }, value: unknown) {
+  if (value === undefined || value === null)
+    return
+  if (isPlainObject(value)) {
+    Object.assign(target, value)
+    return
+  }
+  if (Array.isArray(value))
+    return
+  if (typeof value === 'string') {
+    const { success, value: parsed } = tryParseJsonLike(value)
+    if (success && isPlainObject(parsed)) {
+      Object.assign(target, parsed)
+      return
+    }
+    target.show = toBoolean(value, target.show)
+    return
+  }
+  target.show = toBoolean(value, target.show)
+}
+
+export function isPlainObject(value: unknown): value is Record<string, any> {
+  return Object.prototype.toString.call(value) === '[object Object]'
+}
+
+function extractDemoAttributeSource(content: string) {
+  if (!content)
+    return ''
+  const tagStart = content.indexOf('<demo')
+  if (tagStart === -1)
+    return ''
+  const tagNameEnd = tagStart + '<demo'.length
+  let quote: string | null = null
+  for (let i = tagNameEnd; i < content.length; i++) {
+    const char = content[i]
+    if (quote) {
+      if (char === quote)
+        quote = null
+      continue
+    }
+    if (char === '"' || char === '\'') {
+      quote = char
+      continue
+    }
+    if (char === '>') {
+      let source = content.slice(tagNameEnd, i)
+      source = source.replace(/\/\s*$/, '')
+      return source.trim()
+    }
+  }
+  return ''
+}
+
+function splitAttributeTokens(source: string) {
+  const tokens: string[] = []
+  let buffer = ''
+  let quote: string | null = null
+  for (let i = 0; i < source.length; i++) {
+    const char = source[i]
+    if (quote) {
+      if (char === quote)
+        quote = null
+      buffer += char
+      continue
+    }
+    if (char === '"' || char === '\'') {
+      quote = char
+      buffer += char
+      continue
+    }
+    if (/\s/.test(char)) {
+      if (buffer) {
+        tokens.push(buffer)
+        buffer = ''
+      }
+      continue
+    }
+    buffer += char
+  }
+  if (buffer)
+    tokens.push(buffer)
+  return tokens
+}
+
+function mergeAttributeTokens(tokens: string[]) {
+  const fragments: string[] = []
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i]?.trim()
+    if (!token)
+      continue
+    const eqIndex = token.indexOf('=')
+    if (eqIndex !== -1) {
+      const valuePart = token.slice(eqIndex + 1).trim()
+      if (valuePart) {
+        fragments.push(token)
+        continue
+      }
+      const nextToken = tokens[i + 1]?.trim()
+      if (nextToken && nextToken !== '=') {
+        fragments.push(`${token}${nextToken}`)
+        i++
+        continue
+      }
+      if (nextToken === '=') {
+        const valueToken = tokens[i + 2]?.trim()
+        if (valueToken) {
+          fragments.push(`${token}${valueToken}`)
+          i += 2
+        }
+        else {
+          fragments.push(`${token}true`)
+          i += 1
+        }
+        continue
+      }
+      fragments.push(`${token}true`)
+      continue
+    }
+    const next = tokens[i + 1]?.trim()
+    if (next === '=') {
+      const valueToken = tokens[i + 2]?.trim()
+      if (valueToken) {
+        fragments.push(`${token}=${valueToken}`)
+        i += 2
+      }
+      else {
+        fragments.push(`${token}=true`)
+        i += 1
+      }
+      continue
+    }
+    if (next && !next.includes('=')) {
+      fragments.push(`${token}=${next}`)
+      i++
+    }
+    else {
+      fragments.push(`${token}=true`)
+    }
+  }
+  return fragments
+}
+
+function coerceBoundExpression(value: string): unknown {
+  const trimmed = value.trim()
+  if (!trimmed)
+    return ''
+  const lowered = trimmed.toLowerCase()
+  if (lowered === 'true')
+    return true
+  if (lowered === 'false')
+    return false
+  if (lowered === 'null')
+    return null
+  if (lowered === 'undefined')
+    return undefined
+  if (lowered === 'nan')
+    return Number.NaN
+  if (/^-?\d+(?:\.\d+)?$/.test(trimmed))
+    return Number(trimmed)
+  const { success, value: parsed } = tryParseJsonLike(trimmed)
+  if (success)
+    return parsed
+  return trimmed
+}
+
+function tryParseJsonLike(value: string) {
+  const normalized = formatString(value)
+  if (!normalized)
+    return { success: false as const, value: undefined }
+  try {
+    return { success: true as const, value: JSON.parse(normalized) }
+  }
+  catch (_error) {
+    return { success: false as const, value: undefined }
+  }
+}
+
+function formatString(value: string) {
+  return value
+    .replace(/'/g, '"')
+    .replace(/\\n/g, '')
+    .trim()
+    .replace(/^"/, '')
+    .replace(/"$/, '')
+    .replace(/,(\s)*\}$/, '}')
+    .replace(/,(\s)*\]$/, ']')
+}
 
 /* eslint-disable regexp/no-contradiction-with-assertion */
 // <demo></demo> or <demo />
@@ -224,7 +498,11 @@ export function escapeAttributeValue(value: string) {
  * @param line Line to test
  */
 function looksLikeAttributeLine(line: string) {
-  return /^[A-Z_][\w:-]*\s*=/i.test(line) || /^[A-Z_][\w:-]*\s+.+/i.test(line)
+  const trimmed = line.trim()
+  const keyPattern = /^(?:v-bind:|[:@])?[A-Z_][\w:-]*/i
+  if (!keyPattern.test(trimmed))
+    return false
+  return /=/.test(trimmed) || /\s+.+/.test(trimmed)
 }
 
 /**
@@ -243,12 +521,12 @@ function ensureVuePath(raw: string) {
  * @param line Raw attribute declaration line
  */
 function normalizeAttributeLine(line: string) {
-  const equalsMatch = /^([A-Z_][\w:-]*)\s*=(\S.*)$/i.exec(line)
+  const equalsMatch = /^((?:v-bind:|[:@])?[A-Z_][\w:-]*)\s*=(\S.*)$/i.exec(line)
   if (equalsMatch) {
     const [, key, rawValue] = equalsMatch
     return `${key}="${escapeAttributeValue(stripOuterQuotes(rawValue.trim()))}"`
   }
-  const spaceMatch = /^([A-Z_][\w:-]*)\s+(\S.*)$/i.exec(line)
+  const spaceMatch = /^((?:v-bind:|[:@])?[A-Z_][\w:-]*)\s+(\S.*)$/i.exec(line)
   if (spaceMatch) {
     const [, key, rawValue] = spaceMatch
     return `${key}="${escapeAttributeValue(stripOuterQuotes(rawValue.trim()))}"`
